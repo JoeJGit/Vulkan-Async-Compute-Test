@@ -1,0 +1,57 @@
+Test project related to thread: https://community.amd.com/thread/209805
+
+To utilize async compute it is necessary to use many Command Buffers and Semaphores causing gaps between executing shaders.
+It would be nice to have another synchronization primitive similar to Events that can work across queues so we need only one CB per queue.
+Additionally it would also be possible to build a dependency graph from CB dispatches and memory barriers to keep processing unaffected dispatches while executing a barrier within a single queue. (Probably against the specs but you could make an extension.)
+And of course - maybe you can just shorten the gaps :)
+
+Another related feature i'd like to see in the future:
+The possibility to skip over commands (e.g. by inserting labels and skipif() command).
+I have a lot of indirect zero work dispatches followed by memory barriers every frame and it would be great to skip over them.
+(You could do this just automatically again using a depency graph.)
+
+GPU generated Command Buffers could do this as well. I don't know what's possible with current hardware, but NVidias extensions can not insert barriers, so it's not very useful.
+
+
+
+A big source of confusion and disappointment to me was the fact that graphics queue is faster than the 3 compute/transfer queues, simply because i did not know.
+I accidently compared nonasync graphics queue gainst async compute/transfer queues and got bad async results.
+Now, knowing this, things look pretty good but it took me a long time and luck to get there. 
+I also did not know async happens automatically within a single queue as long as no barriers get in the way.
+Also, people assume things like queues map directly to ACEs and do other bad guesswork. 
+My next guess is that compute/transfer queues have access only to a subset of all CUs. It would be great if you enlighten us.
+I think you should do a blog post to clarify things like that. (Although fine grained compute is not yet that common in games, but there should be interest.)
+(Click the buttons in 'Example Settings' window to see what questions may arise to the developer)
+ 
+
+---------------------------------------
+
+
+
+
+There are two more issues you should look at (the main issue is a bug with atomics - click 'Atomic Bug' button and look at 'Executed Wavefront count' to see):
+
+
+1. VkHelper.cpp, Line 92, change last bool to true: I did not look which extension causes the failure.
+
+LoadDeviceExtensions (device_extensions, enabled_device_extension_count, device_extension_names, 	
+					gpus[i].physicalDevice, MAX_EXTENSIONS, true, /*true*/false); // todo: loading all Extensions causes vkCreateDevice to fail on AMD
+
+
+
+2. AsyncComputeTest_VK.h, Line 1059, Minor issue: I think there should be no validation warning if it is guaranteed that if a queue waits on a Semaphore, other queues start working.
+
+#if 0
+			vkQueueSubmit(GetQueue(0), submitCount, &submitInfosQ0[0], VK_NULL_HANDLE); // Queue 0x000001D7BF7D07D0 (computeQueues[0]) is waiting on semaphore 0x71 (signaled by submitInfosQ1[1]) that has no way to be signaled.
+			vkQueueSubmit(GetQueue(1), submitCount*2, &submitInfosQ1[0], VK_NULL_HANDLE);
+#else
+			for (uint32_t i=0; i<submitCount; i++) // submit task by task to avoid validation errors - are they justified?
+			{
+				vkQueueSubmit(GetQueue(0), 1, &submitInfosQ0[i], VK_NULL_HANDLE);
+				vkQueueSubmit(GetQueue(1), 2, &submitInfosQ1[i*2], VK_NULL_HANDLE);
+			}
+#endif
+
+
+Best regards,
+Joe Joechler

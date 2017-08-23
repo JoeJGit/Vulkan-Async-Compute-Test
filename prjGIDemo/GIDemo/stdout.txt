@@ -1,0 +1,40 @@
+demo_init
+InitVK...
+Ignored instance extension: VK_KHR_get_physical_device_properties2
+Ignored instance extension: VK_KHR_external_memory_capabilities
+Instance extension: VK_KHR_surface
+Instance extension: VK_KHR_win32_surface
+Instance extension: VK_EXT_debug_report
+
+found GPUs: 1
+deviceName: AMD Radeon (TM) R9 Fury Series
+apiVersion: 4194355
+driverVersion: 4218880
+Device extension: VK_KHR_swapchain
+Queue family 0 (1 queues): graphics: 1 compute: 1 transfer: 1 sparse: 1 | Priorities: 0.000000 
+Queue family 1 (3 queues): graphics: 0 compute: 1 transfer: 1 sparse: 1 | Priorities: 1.000000 1.000000 1.000000 
+Queue family 2 (2 queues): graphics: 0 compute: 0 transfer: 1 sparse: 1 | Priorities: 1.000000 1.000000 
+
+CreateApplicationWindow...
+demo_resize
+InitSwapchain...
+demo_prepare
+PrepareBuffers...
+swapchainPresentMode: VK_PRESENT_MODE_IMMEDIATE_KHR
+desiredNumberOfSwapchainImages: 2
+PrepareDepth...
+demo_prepare_cube_data_buffer2
+demo_prepare_cube_data_buffer
+demo_prepare_textures
+CreateFontTexture
+demo_prepare_descriptor_layout
+demo_prepare_render_pass
+demo_prepare_pipeline_ALL
+demo_prepare_descriptor_pool
+demo_prepare_descriptor_set
+PrepareFramebuffers...
+demo_draw_build_cmd
+demo_draw_build_cmd
+GI buffers size: 276480 
+demo_cleanup
+DestroyOnResize

@@ -1,0 +1,45 @@
+#version 450
+
+
+layout (local_size_x = 64) in;
+
+layout (std430, binding = 0) buffer bTEST { float _G_test[]; };
+layout (std430, binding = 1) buffer bDBG { uint _G_dbg[]; };
+layout (std430, binding = 2) buffer bDBG2 { uint _G_dbg2[]; };
+
+
+
+shared float _lds[64];
+
+
+void main ()
+{
+
+
+
+
+
+
+	uint lID = gl_LocalInvocationID.x;
+	uint index = (((gl_WorkGroupID.x) * 64 + lID) & 0xFFF) + 1 * 0x1000;
+
+	_lds[lID] = _G_test[index];
+	memoryBarrierShared(); barrier();
+
+	if (lID<32) _lds[(((lID >> 0) << 1) | (lID & 0) | 1) ] += _lds[(((lID >> 0) << 1) | 0) ]; memoryBarrierShared(); barrier();
+	if (lID<32) _lds[(((lID >> 1) << 2) | (lID & 1) | 2) ] += _lds[(((lID >> 1) << 2) | 1) ]; memoryBarrierShared(); barrier();
+	if (lID<32) _lds[(((lID >> 2) << 3) | (lID & 3) | 4) ] += _lds[(((lID >> 2) << 3) | 3) ]; memoryBarrierShared(); barrier();
+	if (lID<32) _lds[(((lID >> 3) << 4) | (lID & 7) | 8) ] += _lds[(((lID >> 3) << 4) | 7) ]; memoryBarrierShared(); barrier();
+	if (lID<32) _lds[(((lID >> 4) << 5) | (lID & 15) | 16) ] += _lds[(((lID >> 4) << 5) | 15) ]; memoryBarrierShared(); barrier();
+	if (lID<32) _lds[(((lID >> 5) << 6) | (lID & 31) | 32) ] += _lds[(((lID >> 5) << 6) | 31) ]; memoryBarrierShared(); barrier();
+
+	_G_test[index] = _lds[lID];
+
+	if (lID==0) atomicAdd(_G_dbg[1], 1);
+
+
+
+
+
+
+}
